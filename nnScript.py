@@ -96,7 +96,6 @@ def preprocess():
     train_label = np.array(temp_train_label[:50000])
     validation_data = np.array(permuted_train[50000:])
     validation_label = np.array(temp_train_label[50000:])
-    
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
@@ -143,15 +142,27 @@ def nnObjFunction(params, *args):
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0  
-    
     #Your code here
     #
     #
     #
     #
     #
-    
-    
+	sizeof_training_data = training_data.shape[0]
+
+	print len(w1)==n_hidden
+"""	
+	for data in training_data:		#Run from zero to number of training data sets
+		hidden_nodes_output = []
+		for input_weights in w1:
+			sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
+			hidden_nodes.append(sum_of_input_with_weights)
+		hidden_nodes_ouput.append(1)
+		output_nodes_output = []
+		for hidden_weights in hidden_nodes:
+			sum_of_hidden_weights	
+"""		
+				
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
@@ -198,7 +209,7 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]; 
 
-print n_input
+#print n_input
 
 # set the number of nodes in hidden unit (not including bias unit)
 n_hidden = 20;
