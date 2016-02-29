@@ -147,21 +147,20 @@ def nnObjFunction(params, *args):
     #
     #
     #
-    #
-	sizeof_training_data = training_data.shape[0]
-
-	print len(w1)==n_hidden
-"""	
-	for data in training_data:		#Run from zero to number of training data sets
-		hidden_nodes_output = []
-		for input_weights in w1:
-			sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
-			hidden_nodes.append(sum_of_input_with_weights)
-		hidden_nodes_ouput.append(1)
-		output_nodes_output = []
-		for hidden_weights in hidden_nodes:
-			sum_of_hidden_weights	
-"""		
+    # for data in training_data:		#Run from zero to number of training data sets
+    data=training_data[0]
+    hidden_nodes_output = []
+    data=np.append(data,1)
+    for input_weights in w1:
+		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
+		hidden_nodes_output.append(sum_of_input_with_weights)
+    hidden_nodes_output.append(1)
+    hidden_nodes=np.array(hidden_nodes_output)
+    output_nodes = []
+    for hidden_weights in w2:
+        sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
+        output_nodes.append(sum_of_hidden_weights)
+    print output_nodes
 				
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
