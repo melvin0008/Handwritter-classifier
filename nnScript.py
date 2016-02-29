@@ -63,33 +63,43 @@ def preprocess():
     #Pick a reasonable size for validation data
     
     temp_train=[]
+    temp_train_label=[]
     temp_test=[]
+    test_label=[]
+
+
 
     for i in xrange(10):
-        temp_train.append(mat.get("train"+str(i)))
-        temp_test.append(mat.get("test"+str(i)))
+        
+        temp_train.extend(mat.get("train"+str(i)))
+        for __ in xrange(len(mat.get("train"+str(i)))):
+            temp_train_label.append([0 if j!=i else 1 for j in xrange(10)])
+        
+        temp_test.extend(mat.get("test"+str(i)))
+        for __ in xrange(len(mat.get("test"+str(i)))):
+            test_label.append([0 if j!=i else 1 for j in xrange(10)])
+
 
     temp_np_train=np.array(temp_train)
-    temp_np_test=np.array(temp_test)
+    test_data=np.array(temp_test)
 
     temp_np_train=temp_np_train/float(255)
-    temp_np_test=temp_np_test/float(255)
+    test_data=test_data/float(255)
 
     #TODO : Perform feature selection
     #Your code here
 
-    train_data = np.array([])
-    train_label = np.array([])
-    validation_data = np.array([])
-    validation_label = np.array([])
-    test_data = np.array([])
-    test_label = np.array([])
+
+    permuted_train=np.random.permutation(temp_np_train)
+    
+    train_data = np.array(permuted_train[:50000])
+    train_label = np.array(temp_train_label[:50000])
+    validation_data = np.array(permuted_train[50000:])
+    validation_label = np.array(temp_train_label[50000:])
     
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
-    
-
 def nnObjFunction(params, *args):
     """% nnObjFunction computes the value of objective function (negative log 
     %   likelihood error function with regularization) given the parameters 
