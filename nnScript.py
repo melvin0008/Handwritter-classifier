@@ -198,8 +198,10 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]; 
 
+print n_input
+
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50;
+n_hidden = 20;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
