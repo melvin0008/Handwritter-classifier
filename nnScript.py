@@ -59,7 +59,7 @@ def preprocess():
      - feature selection"""
     
     mat = loadmat('mnist_all.mat') #loads the MAT object as a Dictionary
-    # print len(mat.get('test1')[0])
+    
     #Pick a reasonable size for validation data
     
     temp_train=[]
@@ -146,31 +146,41 @@ def nnObjFunction(params, *args):
     # for i,data in enumerate(training_data):
     i=0
     data=training_data[0]
-    hidden_nodes_output = []
-    data=np.append(data,1)              #Appending 1 as a dummy so that dot product can be calculated
-    #Calculate the hidden nodes value matrix
+    #--------------------------------------------Calculation of feed Forward Pass------------------------------------------------#
+    #Calculate output of the hidden layer nodes
+    hidden_nodes_output = np.array([])
+    data=np.append(data,0)              #Appending 0 so that dot product can be calculated
     for input_weights in w1:
 		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
-		hidden_nodes_output.append(sum_of_input_with_weights)
-    hidden_nodes = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
-
-    #Calculate the output nodes value matrix
-    output_nodes = []
+		hidden_nodes_output = np.append(hidden_nodes_output,sum_of_input_with_weights)
+    hidden_nodes_output = np.append(hidden_nodes_output,1)                          #Appending a 1 to hidden layer nodes for the bias node
+    
+    #Calculate the output class value matrix
+    output_nodes = np.array([])
     for hidden_weights in w2:
-        sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
-        output_nodes.append(sum_of_hidden_weights)
+        sum_of_hidden_weights = sigmoid(np.dot(hidden_nodes_output,hidden_weights))
+        output_nodes = np.append(output_nodes,sum_of_hidden_weights)
+
+    #--------------------------------------------Calculation of feed Forward Pass Ends--------------------------------------------#
+
+    #--------------------------------------------Calculation of Backward error propogation----------------------------------------#
 
     #Equation 5
     delta=np.subtract(output_nodes,training_label[i])
     sum_of_errors+=np.sum(np.square(delta))
 
     #Equation 6
-
-    dabba=np.subtract(output_nodes,training_label[i])*(np.ones(len(output_nodes))-output_nodes)*output_nodes
+    #Create error function matrix grad_w2
+    hidden_nodes_output = hidden_nodes_output.reshape(1, hidden_nodes_output.size) #Converting to proper format
+    dabba = ( training_label[i] - output_nodes )*( np.ones(len(output_nodes)) - output_nodes )*output_nodes
     grad_w1=np.array([])
     grad_w2=np.array([])
-    grad_w2=np.add(grad_w2,-1*np.dot(dabba,hidden_nodes))
-    grad_w1=np.add(grad_w1,np.dot(((1-hidden_nodes)*hidden_nodes* (np.dot(dabba,w2))).T,data)) 
+
+    dabba = dabba.reshape(dabba.size, 1)
+    grad_w2 = np.add(grad_w2, np.dot(dabba, hidden_nodes_output) )
+    
+
+    grad_w1=np.add(grad_w1,np.dot(((np.ones(len(hidden_nodes)-hidden_nodes)*hidden_nodes* (np.dot(dabba,w2))).T,data))) 
     total_error=sum_of_errors/len(training_data)
 
 
@@ -233,10 +243,10 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]; 
 
-#print n_input
+
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 4;
+n_hidden = 20;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
@@ -244,7 +254,6 @@ n_class = 10;
 # initialize the weights into some random matrices
 initial_w1 = initializeWeights(n_input, n_hidden);
 initial_w2 = initializeWeights(n_hidden, n_class);
-
 # unroll 2 weight matrices into single column vector
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
