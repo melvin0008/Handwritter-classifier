@@ -143,28 +143,22 @@ def nnObjFunction(params, *args):
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0  
     #Your code here
-    #
-    #
-    #
-    #
-    # for data in training_data:		#Run from zero to number of training data sets
-    data=training_data[0]
-    hidden_nodes_output = []
-    data=np.append(data,1)              #Appending 0 as a dummy so that dot product can be calculated
-    #Calculate the hidden nodes value matrix
-    for input_weights in w1:
-		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
-		hidden_nodes_output.append(sum_of_input_with_weights)
-    hidden_nodes_output = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
+    for data in training_data:		#Run from zero to number of training data sets
+        data=training_data[0]
+        hidden_nodes_output = []
+        data=np.append(data,1)              #Appending 0 as a dummy so that dot product can be calculated
+        #Calculate the hidden nodes value matrix
+        for input_weights in w1:
+    		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
+    		hidden_nodes_output.append(sum_of_input_with_weights)
+        hidden_nodes_output = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
 
-    #Calculate the output nodes value matrix
-    output_nodes = []
-    for hidden_weights in w2:
-        sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
-        output_nodes.append(sum_of_hidden_weights)
-    print output_nodes
-				
-    
+        #Calculate the output nodes value matrix
+        output_nodes = []
+        for hidden_weights in w2:
+            sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
+            output_nodes.append(sum_of_hidden_weights)
+
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
@@ -197,15 +191,12 @@ def nnPredict(w1,w2,data):
     labels = np.array([])
     for data in training_data:
         data = np.append(data, 1)
-        hidden_nodes_output = np.array([])      #Create a new array
+        hidden_nodes_output = np.array([])
         for input_weights in w1:
             sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))        #Take the sigmoid ofdot product of weights and input
             hidden_nodes_output = np.append(hidden_nodes_output, sum_of_input_with_weights)
         hidden_nodes_output = np.append(hidden_nodes_output, 1)
-
-        #Calculate the output class nodes
-       
-       for output_weights in w2:
+        for output_weights in w2:
             sum_of_output_weigthts = sigmoid(np.dot(output_weights, hidden_nodes_output))
             labels = np.append(labels.append, sum_of_output_weigthts) 
         labels.reshape(10,1)
