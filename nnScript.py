@@ -158,7 +158,6 @@ def nnObjFunction(params, *args):
         for hidden_weights in w2:
             sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
             output_nodes.append(sum_of_hidden_weights)
-
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
@@ -188,18 +187,31 @@ def nnPredict(w1,w2,data):
     
     #Your code here
     #This function is similar to the initial calculation in nnObjFunction
+<<<<<<< HEAD
     labels = np.array([])
     for data in training_data:
         data = np.append(data, 1)
         hidden_nodes_output = np.array([])
+=======
+
+    train_data_size = data.shape[0]         #Get the number of input data vectors
+    labels = np.array([])                   #Create a labels array
+    for i in range(0,train_data_size):
+        data = training_data[i]
+        data = np.append(data, 1)    
+
+        #Calculate the hidden nodes weights
+        hidden_nodes_output = np.array([])      #Create a new array
+>>>>>>> b7bff88534fd4c7adbe1f5d399f142b7ae262348
         for input_weights in w1:
-            sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))        #Take the sigmoid ofdot product of weights and input
+            sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))        #Take the sigmoid of dot product of weights and input
             hidden_nodes_output = np.append(hidden_nodes_output, sum_of_input_with_weights)
         hidden_nodes_output = np.append(hidden_nodes_output, 1)
         for output_weights in w2:
             sum_of_output_weigthts = sigmoid(np.dot(output_weights, hidden_nodes_output))
             labels = np.append(labels.append, sum_of_output_weigthts) 
         labels.reshape(10,1)
+        labels = labels.argmax(labels, 1)                                   #Return the index of number which has maximum value
     return labels
     
 
