@@ -138,25 +138,38 @@ def nnObjFunction(params, *args):
     %     layer to unit i in output layer."""
     
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
-    
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-    obj_val = 0  
+    obj_val = 0
+    sum_of_errors=0  
     #Your code here
-    for data in training_data:
-        hidden_nodes_output = []
-        data=np.append(data,1)              #Appending 0 as a dummy so that dot product can be calculated
-        #Calculate the hidden nodes value matrix
-        for input_weights in w1:
-    		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
-    		hidden_nodes_output.append(sum_of_input_with_weights)
-        hidden_nodes_output = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
+    # for i,data in enumerate(training_data):
+    i=0
+    data=training_data[0]
+    hidden_nodes_output = []
+    data=np.append(data,1)              #Appending 1 as a dummy so that dot product can be calculated
+    #Calculate the hidden nodes value matrix
+    for input_weights in w1:
+		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
+		hidden_nodes_output.append(sum_of_input_with_weights)
+    hidden_nodes = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
 
-        #Calculate the output nodes value matrix
-        output_nodes = []
-        for hidden_weights in w2:
-            sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
-            output_nodes.append(sum_of_hidden_weights)
+    #Calculate the output nodes value matrix
+    output_nodes = []
+    for hidden_weights in w2:
+        sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
+        output_nodes.append(sum_of_hidden_weights)
+
+    #Equation 5
+    sum_of_errors+=np.sum(np.square(np.subtract(output_nodes,training_label[i])))
+
+    #Equation 6
+
+    dabba=np.subtract(output_nodes,training_label[i])*(np.ones()-)
+    hidden_nodes 
+    total_error=sum_of_errors/len(training_data)
+
+
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
