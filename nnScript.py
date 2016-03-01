@@ -161,20 +161,25 @@ def nnObjFunction(params, *args):
         output_nodes.append(sum_of_hidden_weights)
 
     #Equation 5
-    sum_of_errors+=np.sum(np.square(np.subtract(output_nodes,training_label[i])))
+    delta=np.subtract(output_nodes,training_label[i])
+    sum_of_errors+=np.sum(np.square(delta))
 
     #Equation 6
 
-    dabba=np.subtract(output_nodes,training_label[i])*(np.ones()-)
-    hidden_nodes 
+    dabba=np.subtract(output_nodes,training_label[i])*(np.ones(len(output_nodes))-output_nodes)*output_nodes
+    grad_w1=np.array([])
+    grad_w2=np.array([])
+    grad_w2=np.add(grad_w2,-1*np.dot(dabba,hidden_nodes))
+    grad_w1=np.add(grad_w1,np.dot(((1-hidden_nodes)*hidden_nodes* (np.dot(dabba,w2))).T,data)) 
     total_error=sum_of_errors/len(training_data)
 
 
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
-    #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_grad = np.array([])
-    
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
+   
+    obj_val=tot
     return (obj_val,obj_grad)
 
 
@@ -231,7 +236,7 @@ n_input = train_data.shape[1];
 #print n_input
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 20;
+n_hidden = 4;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
