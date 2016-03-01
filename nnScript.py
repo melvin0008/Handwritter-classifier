@@ -194,6 +194,7 @@ def nnPredict(w1,w2,data):
     
     #Your code here
     #This function is similar to the initial calculation in nnObjFunction
+<<<<<<< HEAD
 
     train_data_size = data.shape[0]         #Get the number of input data vectors
     labels = np.array([])                   #Create a labels array
@@ -202,6 +203,11 @@ def nnPredict(w1,w2,data):
         data = np.append(data, 1)    
 
         #Calculate the hidden nodes weights
+=======
+    labels = np.array([])
+    for data in training_data:
+        data = np.append(data, 1)
+>>>>>>> 94375d738d1561ec6921d865c95389989a40ac02
         hidden_nodes_output = np.array([])      #Create a new array
         for input_weights in w1:
             sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))        #Take the sigmoid ofdot product of weights and input
