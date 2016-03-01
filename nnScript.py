@@ -150,12 +150,14 @@ def nnObjFunction(params, *args):
     # for data in training_data:		#Run from zero to number of training data sets
     data=training_data[0]
     hidden_nodes_output = []
-    data=np.append(data,1)
+    data=np.append(data,1)              #Appending 0 as a dummy so that dot product can be calculated
+    #Calculate the hidden nodes value matrix
     for input_weights in w1:
 		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
 		hidden_nodes_output.append(sum_of_input_with_weights)
-    hidden_nodes_output.append(1)
-    hidden_nodes=np.array(hidden_nodes_output)
+    hidden_nodes_output = np.append(hidden_nodes_output,1)      #Appending a 1 to hidden layer nodes
+
+    #Calculate the output nodes value matrix
     output_nodes = []
     for hidden_weights in w2:
         sum_of_hidden_weights =sigmoid(np.dot(hidden_nodes,hidden_weights))
@@ -190,9 +192,28 @@ def nnPredict(w1,w2,data):
     % Output: 
     % label: a column vector of predicted labels""" 
     
-    labels = np.array([])
     #Your code here
-    
+    #This function is similar to the initial calculation in nnObjFunction
+
+    train_data_size = data.shape[0]         #Get the number of input data vectors
+    labels = np.array([])             #Create a labels array
+    for i in range(0,train_data_size):
+        data = training_data[i]
+        data = np.append(data, 1)    
+
+        #Calculate the hidden nodes weights
+        hidden_nodes_output = np.array([])      #Create a new array
+        for input_weights in w1:
+            sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))        #Take the sigmoid ofdot product of weights and input
+            hidden_nodes_output = np.append(hidden_nodes_output, sum_of_input_with_weights)
+        hidden_nodes_output = np.append(hidden_nodes_output, 1)
+
+        #Calculate the output class nodes
+       
+       for output_weights in w2:
+            sum_of_output_weigthts = sigmoid(np.dot(output_weights, hidden_nodes_output))
+            labels = np.append(labels.append, sum_of_output_weigthts) 
+        labels.reshape(10,1)
     return labels
     
 
