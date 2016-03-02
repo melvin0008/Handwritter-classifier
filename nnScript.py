@@ -270,7 +270,7 @@ n_input = train_data.shape[1];
 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 1;
+n_hidden = 50;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
