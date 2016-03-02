@@ -195,9 +195,6 @@ def nnObjFunction(params, *args):
     eq5=np.sum(np.square(delta))
 
     dabba=(training_label-o)*(1-o)*o
-    # dabba3=
-    # dabba2=dabba1.T*dabba3
-    # dabba=dabba2*o
 
     grad_w2=np.multiply(-1,np.dot(dabba.T,z))
 
@@ -270,7 +267,7 @@ n_input = train_data.shape[1];
 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50;
+n_hidden = 1;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
