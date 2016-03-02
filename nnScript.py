@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
+import random
 
 
 def initializeWeights(n_in,n_out):
@@ -20,14 +21,30 @@ def initializeWeights(n_in,n_out):
     W = (np.random.rand(n_out, n_in + 1)*2* epsilon) - epsilon;
     return W
     
+def featureReduction(data):
+    deleteIndices = [];
+    #Tweaks added for optimizing
+    for i in range(0,data.shape[1]):
+        if ((data[:,i] - data[0,i]) == 0).all():
+            deleteIndices += [i];
+    #data_temp = np.delete(data,deleteIndices,1)
+    return deleteIndices
     
-    
+def get_dummies(label):
+    rows = label.shape[0];
+    rowsIndex=np.arange(rows,dtype="int")
+    # Below line can be hardcoded in our case 
+    oneKLabel = np.zeros((rows,10))
+    #oneKLabel = np.zeros((rows,np.max(label)+1))
+    oneKLabel[rowsIndex,label.astype(int)]=1
+    return oneKLabel
+
 def sigmoid(z):
     
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
     
-    return  1.0 / (1.0+np.exp(-z))
+    return  1 / (1+np.exp(np.multiply(-1,z)))
     
     
 
@@ -60,42 +77,58 @@ def preprocess():
     
     mat = loadmat('mnist_all.mat') #loads the MAT object as a Dictionary
     
-    #Pick a reasonable size for validation data
-    
-    temp_train=[]
-    temp_train_label=[]
-    temp_test=[]
-    test_label=[]
+    A = np.zeros((0,784))
+    Alabel = []
 
+    test_data = np.zeros((0,784))
+    test_label = []
 
+    # stacking training and testing data 
+    for i in range(10):
+        train = "train" + str(i)
+        trainData = mat.get(train)
+        A = np.concatenate((A,trainData),0)
+        Alabel=np.concatenate((Alabel,np.ones(trainData.shape[0])*i),0);
 
-    for i in xrange(10):
+        test = "test" + str(i)
+        test_data = np.concatenate((test_data,mat.get(test)),0)
+        test_label = np.concatenate((test_label,np.ones(mat.get(test).shape[0])*i),0)
         
-        temp_train.extend(mat.get("train"+str(i)))
-        for __ in xrange(len(mat.get("train"+str(i)))):
-            temp_train_label.append([0 if j!=i else 1 for j in xrange(10)])
+    # normalizing trainig (validation) and testing data  
+    A = np.double(A)
+    test_data = np.double(test_data)
         
-        temp_test.extend(mat.get("test"+str(i)))
-        for __ in xrange(len(mat.get("test"+str(i)))):
-            test_label.append([0 if j!=i else 1 for j in xrange(10)])
+    C = np.where(A>0)
+    A[C] = A[C]/255.0
+
+    D = np.where(test_data>0)
+    test_data[D] = test_data[D]/255.0
 
 
-    temp_np_train=np.array(temp_train)
-    test_data=np.array(temp_test)
+    # spliting train_data into train_data and validation_data
+    train_data = np.zeros((0,784))
+    train_label = np.zeros((50000))
 
-    temp_np_train=temp_np_train/float(255)
-    test_data=test_data/float(255)
-
-    #TODO : Perform feature selection
-    #Your code here
-
-
-    permuted_train=np.random.permutation(temp_np_train)
+    validation_data = np.zeros((0,784))
+    validation_label = np.zeros((10000))
     
-    train_data = np.array(permuted_train[:50000])
-    train_label = np.array(temp_train_label[:50000])
-    validation_data = np.array(permuted_train[50000:])
-    validation_label = np.array(temp_train_label[50000:])
+    # Random samples
+    s = random.sample(range(A.shape[0]),A.shape[0])
+    
+    # Reduce features for the dataset using train
+    deleteIndices = featureReduction(A)
+    
+    # Get Reduced train and test
+    A = np.delete(A,deleteIndices,1)
+    test_data = np.delete(test_data, deleteIndices,1)
+    
+    # Separate train and validation    
+    train_data = A[s[0:50000],:]
+    train_label = Alabel[s[0:50000]]; 
+    
+    
+    validation_data =A[s[50000:60000],:]
+    validation_label = Alabel[s[50000:60000]];
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
@@ -140,61 +173,46 @@ def nnObjFunction(params, *args):
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-    obj_val = 0
-    sum_of_errors=0  
-    #Your code here
-    # for i,data in enumerate(training_data):
-    i=0
-    data=training_data[0]
 
-    #--------------------------------------------Calculation of feed Forward Pass------------------------------------------------#
-    #Calculate output of the hidden layer nodes
-    hidden_nodes_output = np.array([])
-    data=np.append(data,0)              #Appending 0 so that dot product can be calculated
-    for input_weights in w1:
-		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
-		hidden_nodes_output = np.append(hidden_nodes_output,sum_of_input_with_weights)
-    hidden_nodes_output = np.append(hidden_nodes_output,1)                          #Appending a 1 to hidden layer nodes for the bias node
-    
-    #Calculate the output class value matrix
-    output_nodes = np.array([])
-    for hidden_weights in w2:
-        sum_of_hidden_weights = sigmoid(np.dot(hidden_nodes_output,hidden_weights))
-        output_nodes = np.append(output_nodes,sum_of_hidden_weights)
+    trans_w1=w1.T
+    trans_w2=w2.T
 
-    #--------------------------------------------Calculation of feed Forward Pass Ends--------------------------------------------#
+    training_label = get_dummies(np.array(training_label))
+    #add bias 1
+    x=np.column_stack((training_data,np.ones(len(training_data))))
+    #equation1
+    eq1=np.dot(x,trans_w1)
+    #equation 2
+    z=sigmoid(eq1)
+    #add bias 1
+    z=np.column_stack((z,np.ones(len(z))))
+    #equation 3
+    eq3=np.dot(z,trans_w2)
+    #equation 4
+    o=sigmoid(eq3)
 
-    #--------------------------------------------Calculation of Backward error propogation----------------------------------------#
+    delta=np.subtract(o,training_label)
+    eq5=np.sum(np.square(delta))
 
-    grad_w1=np.array([])
-    grad_w2=np.array([])
-    print training_label[i].size
-    #Equation 5
-    delta=np.subtract(output_nodes,training_label[i].reshape(1,training_label.size))
-    sum_of_errors+=np.sum(np.square(delta))
+    dabba=(training_label-o)*(1-o)*o
+    # dabba3=
+    # dabba2=dabba1.T*dabba3
+    # dabba=dabba2*o
 
-    #Equation 6
-    #Create error function matrix grad_w2
-    hidden_nodes_output = hidden_nodes_output.reshape(1, hidden_nodes_output.size) #Converting to proper format
-    dabba = ( training_label[i] - output_nodes )*( np.ones(len(output_nodes)) - output_nodes )*output_nodes
+    grad_w2=np.multiply(-1,np.dot(dabba.T,z))
 
+    grad_w1=np.multiply(-1,np.dot(np.transpose((1-z)*z*np.dot(dabba,w2)),training_data))
 
-    dabba = dabba.reshape(dabba.size, 1)
-    grad_w2 = np.add(grad_w2, np.dot(dabba, hidden_nodes_output) )
-    
-
-    grad_w1=np.add(grad_w1,np.dot(((np.ones(len(hidden_nodes)-hidden_nodes)*hidden_nodes* (np.dot(dabba,w2))).T,data))) 
-    total_error=sum_of_errors/len(training_data)
-
-
-    #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
-    #you would use code similar to the one below to create a flat array
+    grad_w1 = np.delete(grad_w1, n_hidden,0)
+    # print grad_w1.shape
     obj_grad = np.array([])
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-   
-    obj_val=tot
+    obj_grad=obj_grad/len(training_data)
+    obj_grad=np.append(obj_grad,1)
+    # print obj_grad.shape
+    obj_val=eq5/len(training_data)
+    # print obj_val
     return (obj_val,obj_grad)
-
 
 
 def nnPredict(w1,w2,data):
@@ -217,20 +235,23 @@ def nnPredict(w1,w2,data):
     
     #Your code here
     #This function is similar to the initial calculation in nnObjFunction
+    trans_w1=w1.T
+    trans_w2=w2.T
 
-    labels = np.array([])
-    for data_row in data:
-        data_row = np.append(data_row, 1)
-        hidden_nodes_output = np.array([])
-        for input_weights in w1:
-            sum_of_input_with_weights = sigmoid(np.dot(data_row, input_weights))        #Take the sigmoid of dot product of weights and input
-            hidden_nodes_output = np.append(hidden_nodes_output, sum_of_input_with_weights)
-        hidden_nodes_output = np.append(hidden_nodes_output, 1)
-        for output_weights in w2:
-            sum_of_output_weigthts = sigmoid(np.dot(output_weights, hidden_nodes_output))
-            labels = np.append(labels.append, sum_of_output_weigthts) 
-        labels.reshape(10,1)
-        labels = labels.argmax(labels, 1)                                   #Return the index of number which has maximum value
+    x=np.column_stack((data,np.ones(len(data))))
+    #equation1
+    eq1=np.dot(x,trans_w1)
+    
+    #equation2
+    z=sigmoid(eq1)
+
+    z=np.column_stack((z,np.ones(len(z))))
+
+    eq3=np.dot(z,trans_w2)
+
+    o=sigmoid(eq3)
+
+    labels = np.argmax(o, 1)                                   #Return the index of number which has maximum value
     return labels
     
 
@@ -249,7 +270,7 @@ n_input = train_data.shape[1];
 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 20;
+n_hidden = 1;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
@@ -301,4 +322,4 @@ predicted_label = nnPredict(w1,w2,test_data)
 
 #find the accuracy on Validation Dataset
 
-print('\n Test set Accuracy:' + + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
+print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
