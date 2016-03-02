@@ -142,6 +142,12 @@ def nnObjFunction(params, *args):
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
     sum_of_errors=0  
+    
+    grad_w1 = [[0.0 for x in range(w1.shape[1])] for i in range(n_hidden)]
+    grad_w2 = [[0.0 for x in range(n_hidden + 1)] for i in range(n_class)]
+    grad_w1 = np.array(grad_w1)
+    grad_w2 = np.array(grad_w2)    
+    
     #Your code here
     # for i,data in enumerate(training_data):
     i=0
@@ -150,7 +156,7 @@ def nnObjFunction(params, *args):
     #--------------------------------------------Calculation of feed Forward Pass------------------------------------------------#
     #Calculate output of the hidden layer nodes
     hidden_nodes_output = np.array([])
-    data=np.append(data,0)              #Appending 0 so that dot product can be calculated
+    data=np.append(data,1)              #Appending 0 so that dot product can be calculated
     for input_weights in w1:
 		sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
 		hidden_nodes_output = np.append(hidden_nodes_output,sum_of_input_with_weights)
@@ -166,25 +172,18 @@ def nnObjFunction(params, *args):
 
     #--------------------------------------------Calculation of Backward error propogation----------------------------------------#
 
-    grad_w1=np.array([])
-    grad_w2=np.array([])
-    
+
+        
     #Equation 5
-    delta=np.subtract(output_nodes,training_label[i].reshape(1,training_label.size))
+    delta=np.subtract(output_nodes,training_label[i].reshape(1,training_label[i].size))
+
     sum_of_errors+=np.sum(np.square(delta))
 
-    #Equation 6
     #Create error function matrix grad_w2
-    hidden_nodes_output = hidden_nodes_output.reshape(1, hidden_nodes_output.size) #Converting to proper format
-    dabba = ( training_label[i].reshape(10,1) - output_nodes )*( np.ones(len(output_nodes)) - output_nodes )*output_nodes
-
-    dabba = dabba.reshape(dabba.size, 1)
-    grad_w2 = np.add(grad_w2, np.dot(dabba, hidden_nodes_output))
+    delta =  (training_label[i].reshape(1,10) - output_nodes)*(np.ones(10).reshape(1,10) - output_nodes )*output_nodes
+    delta = delta.reshape(10,1)
+    grad_w2 = np.add(grad_w2, np.dot(delta, hidden_nodes_output.reshape(1, hidden_nodes_output.size)))   
     
-    grad_w1=np.add(grad_w1,np.dot(((np.ones(len(hidden_nodes)-hidden_nodes)*hidden_nodes* (np.dot(dabba,w2))).T,data))) 
-    total_error=sum_of_errors/len(training_data)
-
-
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     obj_grad = np.array([])
@@ -215,20 +214,25 @@ def nnPredict(w1,w2,data):
     
     #Your code here
     #This function is similar to the initial calculation in nnObjFunction
-
+    
     labels = np.array([])
-    for data_row in data:
-        data_row = np.append(data_row, 1)
-        hidden_nodes_output = np.array([])
-        for input_weights in w1:
-            sum_of_input_with_weights = sigmoid(np.dot(data_row, input_weights))        #Take the sigmoid of dot product of weights and input
-            hidden_nodes_output = np.append(hidden_nodes_output, sum_of_input_with_weights)
-        hidden_nodes_output = np.append(hidden_nodes_output, 1)
-        for output_weights in w2:
-            sum_of_output_weigthts = sigmoid(np.dot(output_weights, hidden_nodes_output))
-            labels = np.append(labels.append, sum_of_output_weigthts) 
-        labels.reshape(10,1)
-        labels = labels.argmax(labels, 1)                                   #Return the index of number which has maximum value
+    #Calculate output of the hidden layer nodes
+    hidden_nodes_output = np.array([])
+    data=np.append(data,1)              #Appending 0 so that dot product can be calculated
+    for input_weights in w1:
+        sum_of_input_with_weights = sigmoid(np.dot(data, input_weights))
+        hidden_nodes_output = np.append(hidden_nodes_output,sum_of_input_with_weights)
+    hidden_nodes_output = np.append(hidden_nodes_output,1)                          #Appending a 1 to hidden layer nodes for the bias node
+    hidden_nodes_output = hidden_nodes_output.reshape(1, hidden_nodes_output.size)
+    
+    #Calculate the output class value matrix
+    output_nodes = np.array([])
+    for hidden_weights in w2:
+        sum_of_hidden_weights = sigmoid(np.dot(hidden_nodes_output,hidden_weights))
+        labels = np.append(labels,sum_of_hidden_weights)
+    
+    labels = np.argmax(labels, 1)                                   #Return the index of number which has maximum value
+    
     return labels
     
 
