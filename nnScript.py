@@ -146,6 +146,7 @@ def nnObjFunction(params, *args):
     # for i,data in enumerate(training_data):
     i=0
     data=training_data[0]
+
     #--------------------------------------------Calculation of feed Forward Pass------------------------------------------------#
     #Calculate output of the hidden layer nodes
     hidden_nodes_output = np.array([])
@@ -165,16 +166,18 @@ def nnObjFunction(params, *args):
 
     #--------------------------------------------Calculation of Backward error propogation----------------------------------------#
 
+    grad_w1=np.array([])
+    grad_w2=np.array([])
+    print training_label[i].size
     #Equation 5
-    delta=np.subtract(output_nodes,training_label[i])
+    delta=np.subtract(output_nodes,training_label[i].reshape(1,training_label.size))
     sum_of_errors+=np.sum(np.square(delta))
 
     #Equation 6
     #Create error function matrix grad_w2
     hidden_nodes_output = hidden_nodes_output.reshape(1, hidden_nodes_output.size) #Converting to proper format
     dabba = ( training_label[i] - output_nodes )*( np.ones(len(output_nodes)) - output_nodes )*output_nodes
-    grad_w1=np.array([])
-    grad_w2=np.array([])
+
 
     dabba = dabba.reshape(dabba.size, 1)
     grad_w2 = np.add(grad_w2, np.dot(dabba, hidden_nodes_output) )
