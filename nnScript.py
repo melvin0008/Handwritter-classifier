@@ -9,7 +9,6 @@ def initializeWeights(n_in,n_out):
     """
     # initializeWeights return the random weights for Neural Network given the
     # number of node in the input layer and output layer
-
     # Input:
     # n_in: number of nodes of the input layer
     # n_out: number of nodes of the output layer
@@ -44,7 +43,7 @@ def sigmoid(z):
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
     
-    return  1 / (1+np.exp(np.multiply(-1,z)))
+    return  1.0 / 1.0+np.exp(-1.0*z)
     
     
 
@@ -74,61 +73,48 @@ def preprocess():
            function
      - normalize the data to [0, 1]
      - feature selection"""
-    
     mat = loadmat('mnist_all.mat') #loads the MAT object as a Dictionary
     
-    A = np.zeros((0,784))
-    Alabel = []
+    #Pick a reasonable size for validation data
+    
+    temp_train=[]
+    temp_train_label=[]
+    temp_test=[]
+    test_label=[]
 
-    test_data = np.zeros((0,784))
-    test_label = []
 
-    # stacking training and testing data 
-    for i in range(10):
-        train = "train" + str(i)
-        trainData = mat.get(train)
-        A = np.concatenate((A,trainData),0)
-        Alabel=np.concatenate((Alabel,np.ones(trainData.shape[0])*i),0);
 
-        test = "test" + str(i)
-        test_data = np.concatenate((test_data,mat.get(test)),0)
-        test_label = np.concatenate((test_label,np.ones(mat.get(test).shape[0])*i),0)
+    for i in xrange(10):
         
-    # normalizing trainig (validation) and testing data  
-    A = np.double(A)
-    test_data = np.double(test_data)
+        temp_train.extend(mat.get("train"+str(i)))
+        for __ in xrange(len(mat.get("train"+str(i)))):
+            temp_train_label.append([0 if j!=i else 1 for j in xrange(10)])
         
-    C = np.where(A>0)
-    A[C] = A[C]/255.0
-
-    D = np.where(test_data>0)
-    test_data[D] = test_data[D]/255.0
+        temp_test.extend(mat.get("test"+str(i)))
+        for __ in xrange(len(mat.get("test"+str(i)))):
+            test_label.append([0 if j!=i else 1 for j in xrange(10)])
 
 
-    # spliting train_data into train_data and validation_data
-    train_data = np.zeros((0,784))
-    train_label = np.zeros((50000))
+    temp_np_train=np.array(temp_train)
+    test_data=np.array(temp_test)
 
-    validation_data = np.zeros((0,784))
-    validation_label = np.zeros((10000))
-    
-    # Random samples
-    s = random.sample(range(A.shape[0]),A.shape[0])
-    
-    # Reduce features for the dataset using train
-    deleteIndices = featureReduction(A)
-    
-    # Get Reduced train and test
-    A = np.delete(A,deleteIndices,1)
+    temp_np_train=temp_np_train/float(255)
+    test_data=test_data/float(255)
+
+    #TODO : Perform feature selection
+    #Your code here
+
+    deleteIndices = featureReduction(temp_np_train)
+    temp_np_train = np.delete(temp_np_train,deleteIndices,1)
     test_data = np.delete(test_data, deleteIndices,1)
+
+
+    permuted_train=np.random.permutation(range(len(temp_np_train)))
     
-    # Separate train and validation    
-    train_data = A[s[0:50000],:]
-    train_label = Alabel[s[0:50000]]; 
-    
-    
-    validation_data =A[s[50000:60000],:]
-    validation_label = Alabel[s[50000:60000]];
+    train_data = np.array(temp_np_train[permuted_train[:50000],:])
+    train_label = np.array(temp_train_label[permuted_train[:50000]])
+    validation_data = np.array(temp_np_train[permuted_train[50000:]])
+    validation_label = np.array(temp_train_label[permuted_train[50000:]])
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
@@ -177,7 +163,7 @@ def nnObjFunction(params, *args):
     trans_w1=w1.T
     trans_w2=w2.T
 
-    training_label = get_dummies(np.array(training_label))
+    # training_label = get_dummies(np.array(training_label))
     #add bias 1
     x=np.column_stack((training_data,np.ones(len(training_data))))
     #equation1
@@ -198,15 +184,14 @@ def nnObjFunction(params, *args):
 
     grad_w2=np.multiply(-1,np.dot(dabba.T,z))
 
-    grad_w1=np.multiply(-1,np.dot(np.transpose((1-z)*z*np.dot(dabba,w2)),training_data))
+    grad_w1=np.multiply(-1,np.dot(np.transpose((1-z)*z*np.dot(dabba,w2)),x))
 
     grad_w1 = np.delete(grad_w1, n_hidden,0)
     # print grad_w1.shape
     obj_grad = np.array([])
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_grad=obj_grad/len(training_data)
-    obj_grad=np.append(obj_grad,1)
-    # print obj_grad.shape
+
     obj_val=eq5/len(training_data)
     # print obj_val
     return (obj_val,obj_grad)
@@ -267,7 +252,7 @@ n_input = train_data.shape[1];
 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 1;
+n_hidden = 50;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
