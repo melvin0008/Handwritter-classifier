@@ -20,31 +20,15 @@ def initializeWeights(n_in,n_out):
     epsilon = sqrt(6) / sqrt(n_in + n_out + 1);
     W = (np.random.rand(n_out, n_in + 1)*2* epsilon) - epsilon;
     return W
-    
-def featureReduction(data):
-    deleteIndices = [];
-    #Tweaks added for optimizing
-    for i in range(0,data.shape[1]):
-        if ((data[:,i] - data[0,i]) == 0).all():
-            deleteIndices += [i];
-    #data_temp = np.delete(data,deleteIndices,1)
-    return deleteIndices
-    
-def get_dummies(label):
-    rows = label.shape[0];
-    rowsIndex=np.arange(rows,dtype="int")
-    # Below line can be hardcoded in our case 
-    oneKLabel = np.zeros((rows,10))
-    #oneKLabel = np.zeros((rows,np.max(label)+1))
-    oneKLabel[rowsIndex,label.astype(int)]=1
-    return oneKLabel
+
+
 
 def sigmoid(z):
     
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
     
-    return  1 / (1+np.exp(np.multiply(-1,z)))
+    return  1.0 / (1.0+np.exp(-z))
     
     
 
@@ -104,27 +88,28 @@ def preprocess():
     test_data=test_data/255.0
 
     #TODO : Perform feature selection
-    #Your code here
-    deleteIndices = featureReduction(temp_np_train)
-    
-    # # Get Reduced train and test
+    deleteIndices=[]
+    print len(temp_np_train)
+    for i in xrange(temp_np_train.shape[1]):
+        flag=True
+        prev=temp_np_train[:,i][0]
+        for val in temp_np_train[:,i]:
+            if val!=prev:
+                flag=False
+                break
+            prev=val
+        if flag:
+            deleteIndices.append(i)
+
     temp_np_train = np.delete(temp_np_train,deleteIndices,1)
     test_data = np.delete(test_data, deleteIndices,1)
     
     array_permutation = np.random.permutation(xrange(len(temp_np_train)))
     
     train_data = temp_np_train[array_permutation[:50000],:]
-    train_label = temp_train_label[array_permutation[:50000]]; 
+    train_label = temp_train_label[array_permutation[:50000]] 
     validation_data =temp_np_train[array_permutation[50000:],:]
-    validation_label = temp_train_label[array_permutation[50000:]]; 
-    
-    print 'Train_data='+str(train_data.shape)
-    print 'train_label='+str(train_label.shape)
-    print 'valiation_data='+str(validation_data.shape)
-    print 'Validation_label='+str(validation_label.shape)
-    print 'Test_data='+str(test_data.shape)
-    print 'test_label='+str(test_label.shape)
-    
+    validation_label = temp_train_label[array_permutation[50000:]] 
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
@@ -169,13 +154,20 @@ def nnObjFunction(params, *args):
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
-    #print 'W1_shape='+str(w1.shape)
-    #print 'W2_shape='+str(w2.shape)
+
+
+    rows=xrange(len(training_label))
+    print rows
+    oneKLabel = np.zeros((len(training_label),10))
+    print oneKLabel.shape
+        #oneKLabel = np.zeros((rows,np.max(label)+1))
+    oneKLabel[rows,training_label.astype(int)]=1
+    # return oneKLabel
+    training_label=oneKLabel
+
     trans_w1=w1.T
     trans_w2=w2.T
-    # print training_label[0]
-    # print training_label.shape
-    training_label = get_dummies(np.array(training_label))
+    # training_label = get_dummies(np.array(training_label))
     # print training_label[0]
     # print training_label.shape
     #add bias 1
@@ -283,7 +275,7 @@ n_input = train_data.shape[1];
 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 1;
+n_hidden = 4;
 				   
 # set the number of nodes in output unit
 n_class = 10;				   
