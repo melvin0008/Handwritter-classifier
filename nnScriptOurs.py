@@ -89,7 +89,7 @@ def preprocess():
 
     #TODO : Perform feature selection
     deleteIndices=[]
-    print len(temp_np_train)
+   
     for i in xrange(temp_np_train.shape[1]):
         flag=True
         prev=temp_np_train[:,i][0]
@@ -157,19 +157,17 @@ def nnObjFunction(params, *args):
 
 
     rows=xrange(len(training_label))
-    print rows
+    
     oneKLabel = np.zeros((len(training_label),10))
-    print oneKLabel.shape
-        #oneKLabel = np.zeros((rows,np.max(label)+1))
+    
+        
     oneKLabel[rows,training_label.astype(int)]=1
-    # return oneKLabel
+    
     training_label=oneKLabel
 
     trans_w1=w1.T
     trans_w2=w2.T
-    # training_label = get_dummies(np.array(training_label))
-    # print training_label[0]
-    # print training_label.shape
+    
     #add bias 1
     x=np.column_stack((training_data,np.ones(len(training_data))))
     #equation1
@@ -182,41 +180,48 @@ def nnObjFunction(params, *args):
     eq3=np.dot(z,trans_w2)
     #equation 4
     o=sigmoid(eq3)
-    #print 'X='+str(x.shape)
-    #print 'z='+str(z.shape)
-    #print 'o='+str(o.shape) 
+    #-----------------------------------------Calculations for gradient weight vector 2---------------------------------------------
+    
     delta=np.subtract(o,training_label)
     eq5=np.sum(np.square(delta))
 
     dabba=(training_label-o)*(1-o)*o
-    #print 'Dabba='+str(dabba.shape)
-    grad_w2=np.multiply(-1,np.dot(dabba.T,z))
-    #print 'grad_w2='+str(grad_w2.shape)
+   
+    grad_w2=np.multiply(-1,np.dot(dabba.T,z))           #GradW2 done here
+    
+
+    #-----------------------------------------Calculations for gradient weight vector 1---------------------------------------------
 
     one_minus_z_into_z = (1-z)*z
-    #print 'one_minus_z_into_z='+str(one_minus_z_into_z.shape)
+    
     
     multiply_by_summation = one_minus_z_into_z*np.dot(dabba,w2)
-    #print 'multiply_by_summation='+str(multiply_by_summation.shape) 
-
-    #print 'multiply_by_summation Transpose='+str(np.transpose(multiply_by_summation).shape)
-    #print 'Training_data shape='+str(training_data.shape)
+    
     grad_w1_without_minus_one = np.dot(np.transpose(multiply_by_summation),x)
-    #print 'grad_w1_without_minus_one='+str(grad_w1_without_minus_one.shape)
+   
 
     grad_w1=np.multiply(-1,grad_w1_without_minus_one)
     
-    #print 'grad_w1='+str(grad_w1.shape)
-    grad_w1 = np.delete(grad_w1, n_hidden,0)
-    #print 'grad_w1 shape after delete='+str(grad_w1.shape)
-    # #print grad_w1.shape
+    grad_w1 = np.delete(grad_w1, n_hidden,0)            #GradW1 done here
+    
+
+    #-----------------------------------------Calculations for gradient object value---------------------------------------------
+
+    
+    obj_val=eq5/len(training_data)
+    
+    #-----------------------------------------Regularization of gradient val and weight vector---------------------------------------------
+    
+    obj_val = obj_val+ (lambdaval/(2*len(training_data)))*( np.sum(np.square(w1)) +  np.sum(np.square(w2)))
+    grad_w2 = (grad_w2 + lambdaval*w2 )/ len(training_data)  
+    grad_w1 = (grad_w1 + lambdaval*w1 )/ len(training_data)  
+       
+
+   #-----------------------------------------Concatenate both the weight vectors---------------------------------------------
+
     obj_grad = np.array([])
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    obj_grad=obj_grad/len(training_data)
-    #obj_grad=np.append(obj_grad,[1]*n_hidden)
-    #print 'ObjGrad shape='+str(obj_grad.shape)
-    obj_val=eq5/len(training_data)
-    # #print obj_val
+    #obj_grad=obj_grad/len(training_data)
     return (obj_val,obj_grad)
 
 
@@ -287,7 +292,7 @@ initial_w2 = initializeWeights(n_hidden, n_class);
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
-lambdaval = 0;
+lambdaval = 25;
 
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
