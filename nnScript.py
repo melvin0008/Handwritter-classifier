@@ -160,6 +160,7 @@ def nnObjFunction(params, *args):
     w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
+
     trans_w1=w1.T
     trans_w2=w2.T
 
@@ -188,6 +189,7 @@ def nnObjFunction(params, *args):
 
     grad_w1 = np.delete(grad_w1, n_hidden,0)
     # print grad_w1.shape
+
     obj_grad = np.array([])
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_grad=obj_grad/len(training_data)
@@ -217,6 +219,7 @@ def nnPredict(w1,w2,data):
     
     #Your code here
     #This function is similar to the initial calculation in nnObjFunction
+
     trans_w1=w1.T
     trans_w2=w2.T
 
