@@ -1,0 +1,56 @@
+Preprocessing time is =18.5996489525
+Preprocessing time is =18.3606231213
+ Hidden nodes is equal to2
+ Training Time is = 17.5568709373
+
+ Training set Accuracy:11.226%
+
+ Validation set Accuracy:11.29%
+
+ Test set Accuracy:11.35%
+--------------End of this hidden node--------------------
+ Hidden nodes is equal to4
+ Training Time is = 59.6583559513
+
+ Training set Accuracy:62.086%
+
+ Validation set Accuracy:61.81%
+
+ Test set Accuracy:61.79%
+--------------End of this hidden node--------------------
+ Hidden nodes is equal to8
+ Training Time is = 67.0346679688
+
+ Training set Accuracy:89.924%
+
+ Validation set Accuracy:88.88%
+
+ Test set Accuracy:89.68%
+--------------End of this hidden node--------------------
+ Hidden nodes is equal to12
+ Training Time is = 70.423416853
+
+ Training set Accuracy:91.686%
+
+ Validation set Accuracy:90.95%
+
+ Test set Accuracy:91.37%
+--------------End of this hidden node--------------------
+ Hidden nodes is equal to20
+ Training Time is = 79.8692729473
+
+ Training set Accuracy:92.936%
+
+ Validation set Accuracy:91.85%
+
+ Test set Accuracy:92.65%
+--------------End of this hidden node--------------------
+ Hidden nodes is equal to50
+ Training Time is = 149.199071169
+
+ Training set Accuracy:93.486%
+
+ Validation set Accuracy:92.76%
+
+ Test set Accuracy:93.31%
+--------------End of this hidden node--------------------
