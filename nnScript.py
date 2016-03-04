@@ -3,6 +3,7 @@ from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
 import random
+import time
 
 
 def initializeWeights(n_in,n_out):
@@ -190,41 +191,33 @@ def nnObjFunction(params, *args):
     eq3=np.dot(z,trans_w2)
     #equation 4
     o=sigmoid(eq3)
-    #print 'X='+str(x.shape)
-    #print 'z='+str(z.shape)
-    #print 'o='+str(o.shape) 
+    
     delta=np.subtract(o,training_label)
     eq5=np.sum(np.square(delta))
 
     dabba=(training_label-o)*(1-o)*o
-    #print 'Dabba='+str(dabba.shape)
+    
     grad_w2=np.multiply(-1,np.dot(dabba.T,z))
-    #print 'grad_w2='+str(grad_w2.shape)
+    
 
     one_minus_z_into_z = (1-z)*z
-    #print 'one_minus_z_into_z='+str(one_minus_z_into_z.shape)
+    
     
     multiply_by_summation = one_minus_z_into_z*np.dot(dabba,w2)
-    #print 'multiply_by_summation='+str(multiply_by_summation.shape) 
-
-    #print 'multiply_by_summation Transpose='+str(np.transpose(multiply_by_summation).shape)
-    #print 'Training_data shape='+str(training_data.shape)
+    
     grad_w1_without_minus_one = np.dot(np.transpose(multiply_by_summation),x)
-    #print 'grad_w1_without_minus_one='+str(grad_w1_without_minus_one.shape)
+    
 
     grad_w1=np.multiply(-1,grad_w1_without_minus_one)
     
-    #print 'grad_w1='+str(grad_w1.shape)
     grad_w1 = np.delete(grad_w1, n_hidden,0)
-    #print 'grad_w1 shape after delete='+str(grad_w1.shape)
-    # #print grad_w1.shape
+    
     obj_grad = np.array([])
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     obj_grad=obj_grad/len(training_data)
-    #obj_grad=np.append(obj_grad,[1]*n_hidden)
-    #print 'ObjGrad shape='+str(obj_grad.shape)
+    
     obj_val=eq5/len(training_data)
-    # #print obj_val
+    
     return (obj_val,obj_grad)
 
 
