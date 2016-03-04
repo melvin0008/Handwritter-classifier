@@ -308,8 +308,8 @@ for i in range(6):
     opts = {'maxiter' : 50}    # Preferred value.
     start_time = time.time()
     nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
-    print ' Hidden nodes is equal to '+str(n_hidden)
-    print ' Training Time is = '+str(time.time()-start_time)   
+    print (' Hidden nodes is equal to '+str(n_hidden))
+    print (' Training Time is = '+str(time.time()-start_time))   
 #In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
 #and nnObjGradient. Check documentation for this function before you proceed.
 #nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
@@ -338,7 +338,7 @@ for i in range(6):
 
 #find the accuracy on Validation Dataset
     print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
-    print '--------------End of this hidden node--------------------'
+    print ('################## End of hidden node ###############################')
     test_set_accuracy = 100*np.mean((predicted_label == test_label).astype(float))
     if test_set_accuracy > maximum_accuracy:
         optimal_hidden_nodes = hidden_node
@@ -347,73 +347,73 @@ for i in range(6):
         maximum_accuracy = test_set_accuracy
 
 
-# #----------------------------------------------This is for lambda Value(Optimum)------------------------------------------
-# optimum_lambda=0
-# for i in range(101):
-# #  Train Neural Network
+#----------------------------------------------This is for lambda Value(Optimum)------------------------------------------
+optimum_lambda=0
+for i in range(101):
+#  Train Neural Network
 
-# # set the number of nodes in input unit (not including bias unit)
-#     n_input = train_data.shape[1];
+# set the number of nodes in input unit (not including bias unit)
+    n_input = train_data.shape[1];
 
-# # set the number of nodes in hidden unit (not including bias unit)
-#     n_hidden = 50
+# set the number of nodes in hidden unit (not including bias unit)
+    n_hidden = 50
                    
-# # set the number of nodes in output unit
-#     n_class = 10;                  
+# set the number of nodes in output unit
+    n_class = 10;                  
 
-# # initialize the weights into some random matrices
-#     initial_w1 = initializeWeights(n_input, n_hidden);
-#     initial_w2 = initializeWeights(n_hidden, n_class);
-# # unroll 2 weight matrices into single column vector
-#     initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
+# initialize the weights into some random matrices
+    initial_w1 = initializeWeights(n_input, n_hidden);
+    initial_w2 = initializeWeights(n_hidden, n_class);
+# unroll 2 weight matrices into single column vector
+    initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
-# # set the regularization hyper-parameter
-#     lambdaval = i;
-
-
-#     args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
-
-# #Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
-
-#     opts = {'maxiter' : 50}    # Preferred value.
-#     start_time = time.time()
-#     nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
-
-#     print ' lambdaval is equal to'+str(lambdaval)
-# #In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
-# #and nnObjGradient. Check documentation for this function before you proceed.
-# #nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
+# set the regularization hyper-parameter
+    lambdaval = i;
 
 
-# #Reshape nnParams from 1D vector into w1 and w2 matrices
-#     w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
-#     w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+    args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
+
+#Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
+
+    opts = {'maxiter' : 50}    # Preferred value.
+    start_time = time.time()
+    nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
+
+    print (' lambdaval is equal to'+str(lambdaval))
+#In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
+#and nnObjGradient. Check documentation for this function before you proceed.
+#nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
 
 
-# #Test the computed parameters
-
-#     predicted_label = nnPredict(w1,w2,train_data)
-
-
-# #find the accuracy on Training Dataset
-#     print('\n Training set Accuracy:' + str(100*np.mean((predicted_label == train_label).astype(float))) + '%')
-
-#     predicted_label = nnPredict(w1,w2,validation_data)
-
-# #find the accuracy on Validation Dataset
-#     print('\n Validation set Accuracy:' + str(100*np.mean((predicted_label == validation_label).astype(float))) + '%')
+#Reshape nnParams from 1D vector into w1 and w2 matrices
+    w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
+    w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
 
-#     predicted_label = nnPredict(w1,w2,test_data)
+#Test the computed parameters
 
-# #find the accuracy on Validation Dataset
-#     print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
-#     print ' ---------End of this LambdaVal----------------'
-#     test_set_accuracy = 100*np.mean((predicted_label == test_label).astype(float))
-#     if test_set_accuracy > maximum_accuracy:
-#         optimum_lambda = lambdaval
-#         maximum_accuracy = test_set_accuracy
-# pickle.dump([optimal_hidden_nodes, weight1, weight2, optimum_lambda], open('params.pickle', 'wb'))
+    predicted_label = nnPredict(w1,w2,train_data)
+
+
+#find the accuracy on Training Dataset
+    print('\n Training set Accuracy:' + str(100*np.mean((predicted_label == train_label).astype(float))) + '%')
+
+    predicted_label = nnPredict(w1,w2,validation_data)
+
+#find the accuracy on Validation Dataset
+    print('\n Validation set Accuracy:' + str(100*np.mean((predicted_label == validation_label).astype(float))) + '%')
+
+
+    predicted_label = nnPredict(w1,w2,test_data)
+
+#find the accuracy on Validation Dataset
+    print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
+    print (' ---------End of this LambdaVal----------------')
+    test_set_accuracy = 100*np.mean((predicted_label == test_label).astype(float))
+    if test_set_accuracy > maximum_accuracy:
+        optimum_lambda = lambdaval
+        maximum_accuracy = test_set_accuracy
+pickle.dump([optimal_hidden_nodes, weight1, weight2, optimum_lambda], open('params.pickle', 'wb'))
 
 
 
