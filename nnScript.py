@@ -67,6 +67,7 @@ def preprocess():
     temp_train = []
     test_label = []
 
+    #Extract the training data into our temporary labels
     for i in xrange(10):
         temp_train.extend(mat.get("train"+str(i)))
         for __ in xrange(len(mat.get("train"+str(i)))):
@@ -76,21 +77,23 @@ def preprocess():
         for __ in xrange(len(mat.get("test"+str(i)))):
             test_label.append(i)
 
+    #Create Np.arrays of the training and test data        
     temp_np_train=np.array(temp_train)
-    test_data=np.array(temp_test)
-    
-    
     temp_np_train=np.double(temp_np_train)
+
+    test_data=np.array(temp_test)
     test_data=np.double(test_data)
+
     temp_train_label=np.double(temp_train_label)
     test_label=np.double(test_label)
 
-    temp_np_train=temp_np_train/255.0
+    #Normalization
+    temp_np_train=temp_np_train/255.0      
     test_data=test_data/255.0
 
     #TODO : Perform feature selection
     deleteIndices=[]
-   
+   #Select those datasets that have the same features and remove them from the training data
     for i in xrange(temp_np_train.shape[1]):
         flag=True
         prev=temp_np_train[:,i][0]
@@ -105,6 +108,7 @@ def preprocess():
     temp_np_train = np.delete(temp_np_train,deleteIndices,1)
     test_data = np.delete(test_data, deleteIndices,1)
     
+    #Create a permutation from which we can extract data
     array_permutation = np.random.permutation(xrange(len(temp_np_train)))
     
     train_data = temp_np_train[array_permutation[:50000],:]
@@ -184,6 +188,7 @@ def nnObjFunction(params, *args):
     eq3=np.dot(z,trans_w2)
     #equation 4
     o=sigmoid(eq3)
+
     #-----------------------------------------Calculations for gradient weight vector 2---------------------------------------------
     
     delta=np.subtract(o,training_label)
@@ -191,7 +196,7 @@ def nnObjFunction(params, *args):
 
     dabba=(training_label-o)*(1-o)*o
    
-    grad_w2=np.multiply(-1,np.dot(dabba.T,z))           #GradW2 done here
+    grad_w2=np.multiply(-1,np.dot(dabba.T,z))           
     
 
     #-----------------------------------------Calculations for gradient weight vector 1---------------------------------------------
@@ -206,15 +211,15 @@ def nnObjFunction(params, *args):
 
     grad_w1=np.multiply(-1,grad_w1_without_minus_one)
     
-    grad_w1 = np.delete(grad_w1, n_hidden,0)            #GradW1 done here
+    grad_w1 = np.delete(grad_w1, n_hidden,0)            
     
 
-    #-----------------------------------------Calculations for gradient object value---------------------------------------------
+    #-----------------------------------------Calculations for gradient object value----------------------------------------
 
     
     obj_val=eq5/len(training_data)
     
-    #-----------------------------------------Regularization of gradient val and weight vector---------------------------------------------
+    #-----------------------------------------Regularization of gradient val and weight vector-------------------------------
     
     obj_val = obj_val+ (lambdaval/(2*len(training_data)))*( np.sum(np.square(w1)) +  np.sum(np.square(w2)))
     grad_w2 = (grad_w2 + lambdaval*w2 )/ len(training_data)  
@@ -246,7 +251,7 @@ def nnPredict(w1,w2,data):
        
     % Output: 
     % label: a column vector of predicted labels""" 
-    
+    #Similar to the forward pass stage in nnObj
     trans_w1=w1.T
     trans_w2=w2.T
 
@@ -263,7 +268,7 @@ def nnPredict(w1,w2,data):
 
     o=sigmoid(eq3)
 
-    labels = np.argmax(o, 1)                                   #Return the index of number which has maximum value
+    labels = np.argmax(o, 1)                                   #Return the index of the number which has maximum value
     return labels
     
 
@@ -277,7 +282,7 @@ optimal_hidden_nodes = 0.0
 maximum_accuracy = 0.0
 weight1 = np.array([])
 weight2 = np.array([])
-
+#Run the whole set changing the number of hidden nodes
 for i in range(6):
     hidden_node = [2,4,8,12,20,50]
 #  Train Neural Network
@@ -308,8 +313,8 @@ for i in range(6):
     opts = {'maxiter' : 50}    # Preferred value.
     start_time = time.time()
     nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
-    print (' Hidden nodes is equal to '+str(n_hidden))
-    print (' Training Time is = '+str(time.time()-start_time))   
+    print ' Hidden nodes is equal to '+str(n_hidden)
+    print ' Training Time is = '+str(time.time()-start_time)   
 #In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
 #and nnObjGradient. Check documentation for this function before you proceed.
 #nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
@@ -338,8 +343,9 @@ for i in range(6):
 
 #find the accuracy on Validation Dataset
     print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
-    print ('################## End of hidden node ###############################')
+    print '################## End of hidden node ###############################'
     test_set_accuracy = 100*np.mean((predicted_label == test_label).astype(float))
+#IF greater accuracy has been found update the weight values and the max accuracy
     if test_set_accuracy > maximum_accuracy:
         optimal_hidden_nodes = hidden_node
         weight1 = w1
@@ -347,7 +353,8 @@ for i in range(6):
         maximum_accuracy = test_set_accuracy
 
 
-#----------------------------------------------This is for lambda Value(Optimum)------------------------------------------
+#----------------------------------------------lambda Value(Optimum) Calculation------------------------------------------
+#Run Lambda from 0 through 100
 optimum_lambda=0
 for i in range(101):
 #  Train Neural Network
@@ -379,7 +386,7 @@ for i in range(101):
     start_time = time.time()
     nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
 
-    print (' lambdaval is equal to'+str(lambdaval))
+    print ' lambdaval is equal to'+str(lambdaval)
 #In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
 #and nnObjGradient. Check documentation for this function before you proceed.
 #nn_params, cost = fmin_cg(nnObjFunctionVal, initialWeights, nnObjGradient,args = args, maxiter = 50)
@@ -408,11 +415,12 @@ for i in range(101):
 
 #find the accuracy on Validation Dataset
     print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
-    print (' ---------End of this LambdaVal----------------')
+    print ' ############################## End of this LambdaVal ################################'
     test_set_accuracy = 100*np.mean((predicted_label == test_label).astype(float))
     if test_set_accuracy > maximum_accuracy:
-        optimum_lambda = lambdaval
+        optimum_lambda   = lambdaval
         maximum_accuracy = test_set_accuracy
+#Pickle the data into params.pickle file
 pickle.dump([optimal_hidden_nodes, weight1, weight2, optimum_lambda], open('params.pickle', 'wb'))
 
 
